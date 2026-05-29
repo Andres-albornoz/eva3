@@ -10,10 +10,24 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
-@Profile("dev")
+//@Profile("dev")
 @Component
 public class DataLoader implements CommandLineRunner {
     @Autowired
     private HechizoRepository HechizoRepository;
 
+    @Override
+    public void run(String... args) throws Exception {
+        Faker faker = new Faker();
+        Random random = new Random();
+// Generar hehizos
+        for (int i = 0; i < 3; i++) {
+            Hechizo Hechizo = new Hechizo();
+            Hechizo.setId(i + 1);
+            Hechizo.setNombre(faker.book().genre());
+            Hechizo.setAtributo(faker.book().genre());
+            HechizoRepository.save(Hechizo);
+        }
+
+    }
 }
