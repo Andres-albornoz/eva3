@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
@@ -79,32 +78,36 @@ public class HechizoControler {
                 .andExpect(jsonPath("$.nombre").value("Hechizo1"));
     }
 
-    public ResponseEntity<Hechizo> buscarPAtr(@PathVariable String atributo) {
-        try {
-            Hechizo hechizo = HechizoService.findByAtributo(atributo);
-            return ResponseEntity.ok(hechizo);
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+    @Test
+    public void testBuscarPorAtributo() throws Exception {
+        when(HechizoService.findByAtributo("Fuego")).thenReturn(Hechizo);
+
+        mockMvc.perform(get("/api/Hechizo/atributo/Fuego"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.nombre").value("Hechizo1"));
     }
 
-    public ResponseEntity<Hechizo> buscarPNvl(@PathVariable int nivel) {
-        try {
-            Hechizo hechizo = HechizoService.findByNivel(nivel);
-            return ResponseEntity.ok(hechizo);
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+    @Test
+    public void testBuscarPorNivel() throws Exception {
+        when(HechizoService.findByNivel(5)).thenReturn(Hechizo);
+
+        mockMvc.perform(get("/api/Hechizo/nivel/5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.nombre").value("Hechizo1"));
     }
 
-    public ResponseEntity<Hechizo> buscarEnPos(@PathVariable boolean enPos) {
-        try {
-            Hechizo hechizo = HechizoService.findByEnPos(enPos);
-            return ResponseEntity.ok(hechizo);
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+    @Test
+    public void testBuscarEnPos() throws Exception {
+        when(HechizoService.findByEnPos(true)).thenReturn(Hechizo);
+
+        mockMvc.perform(get("/api/Hechizo/enPos/true"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.nombre").value("Hechizo1"));
     }
+
 
     @Test
     public void testUpdate() throws Exception {
@@ -119,31 +122,27 @@ public class HechizoControler {
     }
 
 
-    public ResponseEntity<Hechizo> actualizarEnPos(@PathVariable Integer id) {
-        try {
-            Hechizo H = HechizoService.findById(id);
-            H.setEnPos(true);
-            HechizoService.save(H);
-            log.info("Hechizo actualizado correctamente: {}", H.getNombre());
-            return ResponseEntity.ok(H);
-        } catch (Exception e) {
-            log.error("Error al actualizr hechizo: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+    @Test
+    public void testActualizarEnPos() throws Exception {
+        Hechizo.setEnPos(false);
+
+        when(HechizoService.findById(1)).thenReturn(Hechizo);
+        when(HechizoService.save(any(Hechizo.class))).thenAnswer(i -> i.getArgument(0));
+
+        mockMvc.perform(put("/api/Hechizo/enPos/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.enPos").value(true));
     }
 
-    public ResponseEntity<Hechizo> actualizarnivel(@PathVariable Integer id) {
-        try {
-            Hechizo H = HechizoService.findById(id);
-            int random = (int) (Math.random() * 10);
-            H.setNivel(random);
-            HechizoService.save(H);
-            log.info("Hechizo actualizado correctamente: {}", H.getNombre());
-            return ResponseEntity.ok(H);
-        } catch (Exception e) {
-            log.error("Error al actualizr hechizo: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+    @Test
+    public void testActualizarNivel() throws Exception {
+        when(HechizoService.findById(1)).thenReturn(Hechizo);
+        when(HechizoService.save(any(Hechizo.class))).thenAnswer(i -> i.getArgument(0));
+
+        mockMvc.perform(put("/api/Hechizo/nivelRandom/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.nombre").value("Hechizo1"));
     }
 
     @Test
