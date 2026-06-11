@@ -15,12 +15,12 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("API creacion de hechizos")
                         .version("0.2")
-                        .description("documentacion del micro servicio para la 'creacion y registro de hechizos' "))
+                        .description("documentacion del micro servicio para la 'creacion y registro de hechizos' ")
                         .contact(new Contact()
                         .name("andres albornoz")
                         .email("an.albornozc@duocuc.cl"))
                         .license(new License()
                                 .name("Apache 2.0")
-                                .url("https://www.apache.org/licenses/LICENSE-2.0"));
+                                .url("https://www.apache.org/licenses/LICENSE-2.0")));
     }
 }
