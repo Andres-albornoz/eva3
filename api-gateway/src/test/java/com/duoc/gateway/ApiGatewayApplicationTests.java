@@ -1,13 +1,11 @@
-package eva2.eva2;
+package com.duoc.gateway;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class Eva2ApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
-
+class ApiGatewayApplicationTests {
+    @Test
+    void contextLoads() {
+    }
 }

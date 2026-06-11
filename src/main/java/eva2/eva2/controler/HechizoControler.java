@@ -49,7 +49,7 @@ public class HechizoControler {
 
     //mostrar Hechizos
     @GetMapping
-    @Operation(summary = "obtener los hechisos", description = "obtiene y muesta la lista coplet de hechizos")
+    @Operation(summary = "obtener los hechisos", description = "obtiene y muesta la lista copleta de hechizos")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Operación exitosa")
     })
