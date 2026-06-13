@@ -1,0 +1,39 @@
+version: '3.8'
+
+
+services:
+
+
+  hechizo-servicio:
+    build:
+      context: ./Hechizo-microservicio
+      dockerfile: Dockerfile
+    container_name: hechizo-servicio
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DATABASE_URL=jdbc:h2:mem:hechizodb
+      - DB_USER=sa
+      - DB_PASSWORD=
+    networks:
+      - hechizo-network
+
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - hechizo-servicio
+    networks:
+      - hechizo-network
+
+
+networks:
+  hechizo-network:
+    driver: bridge
+

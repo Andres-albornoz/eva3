@@ -1,4 +1,4 @@
-package com.duoc.gateway;
+package test.java.gateway;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
