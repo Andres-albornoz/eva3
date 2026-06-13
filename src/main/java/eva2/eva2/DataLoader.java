@@ -13,21 +13,26 @@ import java.util.Random;
 //@Profile("dev")
 @Component
 public class DataLoader implements CommandLineRunner {
+
     @Autowired
-    private HechizoRepository HechizoRepository;
+    private HechizoRepository hechizoRepository;
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
+
         Faker faker = new Faker();
         Random random = new Random();
-// Generar hehizos
-        for (int i = 0; i < 3; i++) {
-            Hechizo Hechizo = new Hechizo();
-            Hechizo.setId(i + 1);
-            Hechizo.setNombre(faker.book().genre());
-            Hechizo.setAtributo(faker.book().genre());
-            HechizoRepository.save(Hechizo);
-        }
 
+        for (int i = 0; i < 3; i++) {
+
+            Hechizo hechizo = new Hechizo();
+
+            hechizo.setNombre(faker.book().genre());
+            hechizo.setAtributo(faker.book().genre());
+            hechizo.setNivel(random.nextInt(10));
+            hechizo.setEnPos(random.nextBoolean());
+
+            hechizoRepository.save(hechizo);
+        }
     }
 }
