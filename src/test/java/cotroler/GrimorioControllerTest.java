@@ -1,95 +1,111 @@
 package cotroler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eva2.eva2.controler.MagoController;
-import eva2.eva2.model.Mago;
-import eva2.eva2.service.MagoService;
+import eva2.eva2.controler.GrimorioController;
+import eva2.eva2.model.Grimorio;
+import eva2.eva2.service.GrimorioService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;import org.springframework.http.MediaType;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(MagoController.class)
+@WebMvcTest(GrimorioController.class)
 public class GrimorioControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
-    private MagoService magoService;
+    private GrimorioService grimorioService;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    private Mago mago;
+    private Grimorio grimorio;
 
     @BeforeEach
     void setUp() {
-        mago = new Mago();
-        mago.setId(1);
-        mago.setNombre("Merlin");
-        mago.setNivel(10);
-        mago.setMana(100);
+        grimorio = new Grimorio();
+        grimorio.setId(1);
+        grimorio.setNombre("Libro de sombras");
+        grimorio.setCapacidad(25);
     }
 
     @Test
     void testCrear() throws Exception {
-        when(magoService.save(any(Mago.class))).thenReturn(mago);
+        when(grimorioService.save(any(Grimorio.class))).thenReturn(grimorio);
 
-        mockMvc.perform(post("/api/v1/Magos")
+        mockMvc.perform(post("/api/v1/Grimorios")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(mago)))
+                        .content(objectMapper.writeValueAsString(grimorio)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.nombre").value("Libro de sombras"));
+    }
+
+    @Test
+    void testMostrar() throws Exception {
+        when(grimorioService.findAll()).thenReturn(List.of(grimorio));
+
+        mockMvc.perform(get("/api/v1/Grimorios"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].capacidad").value(25));
+    }
+
+    @Test
+    void testBuscar() throws Exception {
+        when(grimorioService.findById(1)).thenReturn(grimorio);
+
+        mockMvc.perform(get("/api/v1/Grimorios/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nombre").value("Libro de sombras"));
+    }
+
+    @Test
+    void testBuscarNombre() throws Exception {
+        when(grimorioService.findByNombre("Libro de sombras")).thenReturn(grimorio);
+
+        mockMvc.perform(get("/api/v1/Grimorios/nombre/Libro de sombras"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1));
     }
 
     @Test
-    void testMostrar() throws Exception {
-        when(magoService.findAll()).thenReturn(List.of(mago));
-
-        mockMvc.perform(get("/api/v1/Magos"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].nombre").value("Merlin"));
-    }
-
-    @Test
-    void testBuscar() throws Exception {
-        when(magoService.findById(1)).thenReturn(mago);
-
-        mockMvc.perform(get("/api/v1/Magos/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nombre").value("Merlin"));
-    }
-
-    @Test
     void testActualizar() throws Exception {
+        when(grimorioService.findById(1)).thenReturn(grimorio);
+        when(grimorioService.save(any(Grimorio.class))).thenReturn(grimorio);
 
-        when(magoService.findById(1)).thenReturn(mago);
-        when(magoService.save(any(Mago.class))).thenReturn(mago);
-
-        mockMvc.perform(put("/api/v1/Magos/1")
+        mockMvc.perform(put("/api/v1/Grimorios/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(mago)))
-                .andExpect(status().isOk());
+                        .content(objectMapper.writeValueAsString(grimorio)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.capacidad").value(25));
     }
 
     @Test
     void testBorrar() throws Exception {
+        doNothing().when(grimorioService).delete(1);
 
-        doNothing().when(magoService).delete(1);
-
-        mockMvc.perform(delete("/api/v1/Magos/1"))
+        mockMvc.perform(delete("/api/v1/Grimorios/1"))
                 .andExpect(status().isNoContent());
 
-        verify(magoService, times(1)).delete(1);
+        verify(grimorioService, times(1)).delete(1);
     }
 }

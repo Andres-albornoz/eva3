@@ -1,152 +1,174 @@
 package cotroler;
 
-import eva2.eva2.model.Hechizo;
-import eva2.eva2.service.HechizoService;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eva2.eva2.controler.HechizoControler;
+import eva2.eva2.model.Hechizo;
+import eva2.eva2.model.HechizoDTO;
+import eva2.eva2.service.HechizoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(HechizoControlerTEST.class)
+@WebMvcTest(HechizoControler.class)
 public class HechizoControlerTEST {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private HechizoService HechizoService;
+    @MockitoBean
+    private HechizoService hechizoService;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    private Hechizo Hechizo;
+    private Hechizo hechizo;
+    private HechizoDTO hechizoDTO;
 
     @BeforeEach
     void setUp() {
-        Hechizo = new Hechizo();
-        Hechizo.setId(1);
-        Hechizo.setNombre("Hechizo1");
-        Hechizo.setAtributo("atributo1");
-        Hechizo.setNivel(1);
-        Hechizo.setEnPos(true);
+        hechizo = new Hechizo();
+        hechizo.setId(1);
+        hechizo.setNombre("Bola de fuego");
+        hechizo.setAtributo("Fuego");
+        hechizo.setNivel(1);
+        hechizo.setEnPos(true);
+
+        hechizoDTO = new HechizoDTO();
+        hechizoDTO.setNombre("Bola de fuego");
+        hechizoDTO.setAtributo("Fuego");
     }
 
     @Test
-    public void testCrear() throws Exception {
-        when(HechizoService.save(any(Hechizo.class))).thenReturn(Hechizo);
+    void testCrear() throws Exception {
+        when(hechizoService.save(any(Hechizo.class))).thenReturn(hechizo);
 
-        mockMvc.perform(post("/api/Hechizo")
+        mockMvc.perform(post("/api/v1/Hechizos")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Hechizo)))
+                        .content(objectMapper.writeValueAsString(hechizoDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.nombre").value("Hechizo1"));
+                .andExpect(jsonPath("$.nombre").value("Bola de fuego"))
+                .andExpect(jsonPath("$.atributo").value("Fuego"))
+                .andExpect(jsonPath("$.nivel").value(0))
+                .andExpect(jsonPath("$.enPos").value(false));
     }
 
     @Test
-    public void testGetAll() throws Exception {
-        when(HechizoService.findAll()).thenReturn(List.of(Hechizo));
+    void testMostrar() throws Exception {
+        when(hechizoService.findAll()).thenReturn(List.of(hechizo));
 
-        mockMvc.perform(get("/api/salas"))
+        mockMvc.perform(get("/api/v1/Hechizos"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].nombre").value("Hechizo1"));
+                .andExpect(jsonPath("$[0].nombre").value("Bola de fuego"));
     }
 
     @Test
-    public void testGeById() throws Exception {
-        when(HechizoService.findById(1)).thenReturn(Hechizo);
+    void testMostrarVacio() throws Exception {
+        when(hechizoService.findAll()).thenReturn(List.of());
 
-        mockMvc.perform(get("/api/Hechizo/1"))
+        mockMvc.perform(get("/api/v1/Hechizos"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void testBuscar() throws Exception {
+        when(hechizoService.findById(1)).thenReturn(hechizo);
+
+        mockMvc.perform(get("/api/v1/Hechizos/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nombre").value("Bola de fuego"));
+    }
+
+    @Test
+    void testBuscarPorAtributo() throws Exception {
+        when(hechizoService.findByAtributo("Fuego")).thenReturn(hechizo);
+
+        mockMvc.perform(get("/api/v1/Hechizos/atributo/Fuego"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.nombre").value("Hechizo1"));
+                .andExpect(jsonPath("$.atributo").value("Fuego"));
     }
 
     @Test
-    public void testBuscarPorAtributo() throws Exception {
-        when(HechizoService.findByAtributo("Fuego")).thenReturn(Hechizo);
+    void testBuscarPorNivel() throws Exception {
+        when(hechizoService.findByNivel(1)).thenReturn(hechizo);
 
-        mockMvc.perform(get("/api/Hechizo/atributo/Fuego"))
+        mockMvc.perform(get("/api/v1/Hechizos/nivel/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.nombre").value("Hechizo1"));
+                .andExpect(jsonPath("$.nivel").value(1));
     }
 
     @Test
-    public void testBuscarPorNivel() throws Exception {
-        when(HechizoService.findByNivel(5)).thenReturn(Hechizo);
+    void testBuscarEnPos() throws Exception {
+        when(hechizoService.findByEnPos(true)).thenReturn(hechizo);
 
-        mockMvc.perform(get("/api/Hechizo/nivel/5"))
+        mockMvc.perform(get("/api/v1/Hechizos/enpos/true"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.nombre").value("Hechizo1"));
+                .andExpect(jsonPath("$.enPos").value(true));
     }
 
     @Test
-    public void testBuscarEnPos() throws Exception {
-        when(HechizoService.findByEnPos(true)).thenReturn(Hechizo);
+    void testActualizar() throws Exception {
+        when(hechizoService.findById(1)).thenReturn(hechizo);
+        when(hechizoService.save(any(Hechizo.class))).thenReturn(hechizo);
 
-        mockMvc.perform(get("/api/Hechizo/enPos/true"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.nombre").value("Hechizo1"));
-    }
-
-
-    @Test
-    public void testUpdate() throws Exception {
-        when(HechizoService.save(any(Hechizo.class))).thenReturn(Hechizo);
-
-        mockMvc.perform(put("/api/Hechizo/1")
+        mockMvc.perform(put("/api/v1/Hechizos/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Hechizo)))
+                        .content(objectMapper.writeValueAsString(hechizoDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.nombre").value("Hechizo1"));
+                .andExpect(jsonPath("$.nombre").value("Bola de fuego"))
+                .andExpect(jsonPath("$.atributo").value("Fuego"));
     }
 
-
     @Test
-    public void testActualizarEnPos() throws Exception {
-        Hechizo.setEnPos(false);
+    void testActualizarEnPos() throws Exception {
+        hechizo.setEnPos(false);
+        when(hechizoService.findById(1)).thenReturn(hechizo);
+        when(hechizoService.save(any(Hechizo.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        when(HechizoService.findById(1)).thenReturn(Hechizo);
-        when(HechizoService.save(any(Hechizo.class))).thenAnswer(i -> i.getArgument(0));
-
-        mockMvc.perform(put("/api/Hechizo/enPos/1"))
+        mockMvc.perform(put("/api/v1/Hechizos/1/enPos"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.enPos").value(true));
     }
 
     @Test
-    public void testActualizarNivel() throws Exception {
-        when(HechizoService.findById(1)).thenReturn(Hechizo);
-        when(HechizoService.save(any(Hechizo.class))).thenAnswer(i -> i.getArgument(0));
+    void testActualizarNivel() throws Exception {
+        when(hechizoService.findById(1)).thenReturn(hechizo);
+        when(hechizoService.save(any(Hechizo.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        mockMvc.perform(put("/api/Hechizo/nivelRandom/1"))
+        mockMvc.perform(put("/api/v1/Hechizos/1/nivel"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.nombre").value("Hechizo1"));
+                .andExpect(jsonPath("$.nombre").value("Bola de fuego"));
     }
 
     @Test
-    public void testDelete() throws Exception {
-        doNothing().when(HechizoService).delete(1);
+    void testBorrar() throws Exception {
+        doNothing().when(hechizoService).delete(1);
 
-        mockMvc.perform(delete("/api/Hechizo/1"))
-                .andExpect(status().isOk());
+        mockMvc.perform(delete("/api/v1/Hechizos/1"))
+                .andExpect(status().isNoContent());
 
-        verify(HechizoService, times(1)).delete(1);
+        verify(hechizoService, times(1)).delete(1);
     }
 }

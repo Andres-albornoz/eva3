@@ -1,11 +1,11 @@
 package cotroler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import eva2.eva2.controler.InvocacionController;
 import eva2.eva2.model.Invocacion;
 import eva2.eva2.service.InvocacionService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -15,9 +15,16 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(InvocacionController.class)
 public class InvocacionControllerTest {
@@ -26,76 +33,79 @@ public class InvocacionControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private InvocacionService service;
+    private InvocacionService invocacionService;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    private Invocacion objeto;
+    private Invocacion invocacion;
 
     @BeforeEach
     void setUp() {
-        objeto = new Invocacion();
-
-        // Ajustar según la entidad
-        objeto.setId(1);
+        invocacion = new Invocacion();
+        invocacion.setId(1);
+        invocacion.setNombre("Fenix");
+        invocacion.setNivel(5);
     }
 
     @Test
     void testCrear() throws Exception {
+        when(invocacionService.save(any(Invocacion.class))).thenReturn(invocacion);
 
-        when(service.save(any(Invocacion.class)))
-                .thenReturn(objeto);
-
-        mockMvc.perform(post("RUTA/api/v1/Magos")
+        mockMvc.perform(post("/api/v1/Invocaciones")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(objeto)))
-                .andExpect(status().isOk());
+                        .content(objectMapper.writeValueAsString(invocacion)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.nombre").value("Fenix"));
     }
 
     @Test
     void testMostrar() throws Exception {
+        when(invocacionService.findAll()).thenReturn(List.of(invocacion));
 
-        when(service.findAll())
-                .thenReturn(List.of(objeto));
-
-        mockMvc.perform(get("RUTA"))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/Invocaciones"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nivel").value(5));
     }
 
     @Test
     void testBuscar() throws Exception {
+        when(invocacionService.findById(1)).thenReturn(invocacion);
 
-        when(service.findById(1))
-                .thenReturn(objeto);
+        mockMvc.perform(get("/api/v1/Invocaciones/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nombre").value("Fenix"));
+    }
 
-        mockMvc.perform(get("RUTA/1"))
-                .andExpect(status().isOk());
+    @Test
+    void testBuscarNombre() throws Exception {
+        when(invocacionService.findByNombre("Fenix")).thenReturn(invocacion);
+
+        mockMvc.perform(get("/api/v1/Invocaciones/nombre/Fenix"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1));
     }
 
     @Test
     void testActualizar() throws Exception {
+        when(invocacionService.findById(1)).thenReturn(invocacion);
+        when(invocacionService.save(any(Invocacion.class))).thenReturn(invocacion);
 
-        when(service.findById(1))
-                .thenReturn(objeto);
-
-        when(service.save(any(Invocacion.class)))
-                .thenReturn(objeto);
-
-        mockMvc.perform(put("RUTA/1")
+        mockMvc.perform(put("/api/v1/Invocaciones/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(objeto)))
-                .andExpect(status().isOk());
+                        .content(objectMapper.writeValueAsString(invocacion)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nivel").value(5));
     }
 
     @Test
     void testBorrar() throws Exception {
+        doNothing().when(invocacionService).delete(1);
 
-        doNothing().when(service).delete(1);
-
-        mockMvc.perform(delete("RUTA/1"))
+        mockMvc.perform(delete("/api/v1/Invocaciones/1"))
                 .andExpect(status().isNoContent());
 
-        verify(service, times(1)).delete(1);
+        verify(invocacionService, times(1)).delete(1);
     }
 }

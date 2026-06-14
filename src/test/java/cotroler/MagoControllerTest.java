@@ -71,6 +71,15 @@ public class MagoControllerTest {
     }
 
     @Test
+    void testBuscarNombre() throws Exception {
+        when(magoService.findByNombre("Merlin")).thenReturn(mago);
+
+        mockMvc.perform(get("/api/v1/Magos/nombre/Merlin"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1));
+    }
+
+    @Test
     void testActualizar() throws Exception {
 
         when(magoService.findById(1)).thenReturn(mago);
