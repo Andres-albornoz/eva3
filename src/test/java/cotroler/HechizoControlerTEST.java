@@ -1,21 +1,15 @@
 package cotroler;
 
 import eva2.eva2.model.Hechizo;
-import eva2.eva2.model.HechizoDTO;
 import eva2.eva2.service.HechizoService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
@@ -23,8 +17,8 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(HechizoControler.class)
-public class HechizoControler {
+@WebMvcTest(HechizoControlerTEST.class)
+public class HechizoControlerTEST {
 
     @Autowired
     private MockMvc mockMvc;
