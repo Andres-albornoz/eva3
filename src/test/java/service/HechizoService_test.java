@@ -94,7 +94,7 @@ class HechizoServiceTest {
                 new Hechizo(1, "HECHIZO1", "atributo1", 1, true);
 
         when(hechizoRepository.findByAtributo("atributo1"))
-                .thenReturn(Optional.of(hechizo));
+                .thenReturn(hechizo);
 
         Hechizo resultado =
                 hechizoService.findByAtributo("atributo1");
@@ -110,7 +110,7 @@ class HechizoServiceTest {
                 new Hechizo(1, "HECHIZO1", "atributo1", 1, true);
 
         when(hechizoRepository.findByNivel(1))
-                .thenReturn(Optional.of(Hechizo));
+                .thenReturn(hechizo);
 
         Hechizo resultado =
                 hechizoService.findByNivel(1);
@@ -126,7 +126,7 @@ class HechizoServiceTest {
                 new Hechizo(1, "HECHIZO1", "atributo1", 1, true);
 
         when(hechizoRepository.findByEnPos(true))
-                .thenReturn(Optional.of(hechizo));
+                .thenReturn(hechizo);
 
         Hechizo resultado =
                 hechizoService.findByEnPos(true);
